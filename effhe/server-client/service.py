@@ -21,11 +21,13 @@ server.listen()
 conn, addr = server.accept()
 with conn:
     print(f"Connection established by {addr}")
+
+    print("Stage 1: Getting Request Type")
     # Initialise data object
     data = None
     while True:
         # Read in client request
-        data += conn.recv(1024)
+        data += conn.recv(1024).decode('ascii')
         if not data:
             break
 
