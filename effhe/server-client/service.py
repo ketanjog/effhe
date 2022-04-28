@@ -32,7 +32,7 @@ with conn:
         	break
         data += req.decode('ascii')
 
-client_request = json.load(data)
+client_request = json.loads(data)
 
 print(client_request)
 
