@@ -7,8 +7,8 @@ import tenseal as ts
 
 #They act as the server since they recieve a request, apply non-linearity, and send it back
 
-PORT = 8080
-IP = '0.0.0.0'
+PORT = 65432
+IP = "127.0.0.1"
 
 def compute_act(act, inpt, params=None):
 	if(act == "relu"):
