@@ -89,14 +89,20 @@ def send_data(client, data, context, kernel_shape, stride, service_type):
             kernel_shape[1], stride
     )
 
-	data_enc = data_enc
+
+	ctx_copy = context.copy()
+	ctx_copy.make_context_public()
+	ctx = ctx_copy.serialize()
+	data_enc = data_enc.serialize()
 
 	payload = {
-		"data": data_enc,
+		"data": str(data_enc),
+		"ctx": str(ctx),
 		"model": service_type
 	}
 
 	payload = json.dumps(payload)
+	payload = payload.encode('ascii')
 
 	client.send(payload)
 	client.close()
