@@ -31,6 +31,8 @@ with conn:
 
 client_request = json.load(data)
 
+print(client_request)
+
 
 
 
