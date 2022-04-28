@@ -1,7 +1,9 @@
+from http import client
 import torch
 import tenseal as ts
 import socket
 import json
+from effhe.constants.models import AVAILABLE_MODELS
 
 #This is the SERVICE file
 
@@ -29,12 +31,22 @@ with conn:
         # Read in client request
         req = conn.recv(1024)
         if(len(req) == 0):
-        	break
+            break
         data += req.decode('ascii')
 
-client_request = json.loads(data)
+    client_request = json.loads(data)
 
-print(client_request)
+    if client_request["model"] not in AVAILABLE_MODELS:
+        error = "Request {} is not supported at this time".format(client_request["model"])
+        conn.send(error.encode('ascii'))
+    else:
+        error = "Loading {} ...".format(client_request["model"])
+        conn.send(error.encode('ascii'))
+
+
+
+
+print(client_request["model"])
 
 
 

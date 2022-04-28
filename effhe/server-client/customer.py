@@ -105,6 +105,11 @@ def send_data(client, data, context, kernel_shape, stride, service_type):
 	payload = payload.encode('ascii')
 
 	client.send(payload)
+
+	response = client.recv(4096).decode('ascii')
+
+	print(response)
+
 	client.close()
 
 #Part 1
@@ -121,8 +126,9 @@ client = get_client()
 context = gen_key("small")
 
 for data, label in test_loader:
-	send_data(client, data, context, kernel_shape, stride, service_type="modelC")
+	send_data(client, data, context, kernel_shape, stride, service_type="modelA")
 	break
+
 
 
 
