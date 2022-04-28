@@ -106,10 +106,14 @@ def send_data(client, data, context, kernel_shape, stride, service_type):
 
 	client.send(payload)
 
-	response = client.recv(4096).decode('ascii')
-
-	print(response)
-
+	while(True):
+		data = client.recv(1024)
+		print(data.decode('ascii'))
+		
+		if(data==b''):
+			print("Connection closed")
+			break
+	
 	client.close()
 
 #Part 1

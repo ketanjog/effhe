@@ -38,10 +38,11 @@ with conn:
 
     if client_request["model"] not in AVAILABLE_MODELS:
         error = "Request {} is not supported at this time".format(client_request["model"])
-        conn.send(error.encode('ascii'))
+        conn.sendall(error.encode('ascii'))
+        print("sent")
     else:
         error = "Loading {} ...".format(client_request["model"])
-        conn.send(error.encode('ascii'))
+        conn.sendall(error.encode('ascii'))
 
 
 
