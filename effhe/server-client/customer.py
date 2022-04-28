@@ -79,7 +79,7 @@ def get_client():
 	client = client.socket(socket.AF_INET, socket.SOCK_STREAM)
 	return client
 
-def send_data(client, data, context, kernel_shape, stride):
+def send_data(client, data, context, kernel_shape, stride, service_type):
 	client.connect((IP, PORT))
 
 	data_enc, windows_nb = ts.im2col_encoding(
@@ -90,7 +90,8 @@ def send_data(client, data, context, kernel_shape, stride):
 	data_enc = data_enc.serialize()
 
 	payload = {
-		"data": data_enc
+		"data": data_enc,
+		"model": service_type
 	}
 
 	payload = json.dumps(payload)
