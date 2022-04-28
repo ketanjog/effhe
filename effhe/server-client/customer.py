@@ -103,9 +103,18 @@ def send_data(client, data, context, kernel_shape, stride):
 kernel_shape = (7, 7)
 stride = 3
 
+# Load the data
+test_data = datasets.MNIST('data', train=False, download=True, transform=transforms.ToTensor())
+# Load one element at a time
+test_loader = torch.utils.data.DataLoader(test_data, batch_size=1, shuffle=False)
+
 client = get_client()
 context = gen_key("small")
-send_data(client, None, context, kernel_shape, stride)
+
+for data, label in test_loader:
+	send_data(client, data, context, kernel_shape, stride)
+	break
+
 
 
 
