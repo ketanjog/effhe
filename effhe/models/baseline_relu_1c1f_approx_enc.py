@@ -32,10 +32,11 @@ class EncSimpleAprxConvNet:
         enc_x = ts.CKKSVector.pack_vectors(enc_channels)
 
         #Relu approximation from https://arxiv.org/pdf/1811.09953.pdf (faster cryptonets)
-        #enc_x = 0.125*enc_x*enc_x + 0.5*enc_x + 0.25
-        #print(enc_x1.decrypt())
-        enc_x = enc_x.polyval([0.25, 0.5, 0.125]) 
-        #print(enc_x.decrypt())
+        enc_x = enc_x.polyval(
+            [0.25, 
+            0.5,
+            0.125]
+        )
 
         # fc1 layer
         enc_x = enc_x.mm(self.fc1_weight) + self.fc1_bias

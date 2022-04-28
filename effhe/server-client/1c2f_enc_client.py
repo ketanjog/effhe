@@ -29,8 +29,9 @@ class EncConvReluNet:
         enc_x = ts.CKKSVector.pack_vectors(enc_channels)
 
         # =====BEGIN CLIENT-SIDE ACTIONS=====
-        # decrypt 
-        dec_x = torch.tensor(enc_x.decrypt())
+        # decrypt
+        dec_x = enc_x.decrypt()
+        dec_x = torch.tensor(dec_x)
 
         # apply relu
         dec_x = self.relu(dec_x)
@@ -45,7 +46,8 @@ class EncConvReluNet:
         
         # =====BEGIN CLIENT-SIDE ACTIONS=====
         # decrypt 
-        dec_x = torch.tensor(enc_x.decrypt())
+        dec_x = enc_x.decrypt()
+        dec_x = torch.tensor(dec_x)
 
         # apply relu
         dec_x = self.relu(dec_x)

@@ -33,7 +33,8 @@ class EncSimpleConvNet:
 
         # =====BEGIN CLIENT-SIDE ACTIONS=====
         # decrypt 
-        dec_x = torch.tensor(enc_x.decrypt())
+        dec_x = enc_x.decrypt()
+        dec_x = torch.tensor(dec_x)
 
         # apply relu
         dec_x = self.relu(dec_x)
