@@ -24,12 +24,13 @@ with conn:
 
     print("Stage 1: Getting Request Type")
     # Initialise data object
-    data = None
+    data = ""
     while True:
         # Read in client request
-        data += conn.recv(1024).decode('ascii')
-        if not data:
-            break
+        req = conn.recv(1024)
+        if(len(req) == 0):
+        	break
+        data += req.decode('ascii')
 
 client_request = json.load(data)
 
