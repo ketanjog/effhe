@@ -78,7 +78,7 @@ def get_server():
 	return server
 
 def get_client():
-	client = client.socket(socket.AF_INET, socket.SOCK_STREAM)
+	client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	return client
 
 def send_data(client, data, context, kernel_shape, stride, service_type):
@@ -89,7 +89,7 @@ def send_data(client, data, context, kernel_shape, stride, service_type):
             kernel_shape[1], stride
     )
 
-	data_enc = data_enc.serialize()
+	data_enc = data_enc
 
 	payload = {
 		"data": data_enc,
@@ -115,7 +115,7 @@ client = get_client()
 context = gen_key("small")
 
 for data, label in test_loader:
-	send_data(client, data, context, kernel_shape, stride)
+	send_data(client, data, context, kernel_shape, stride, service_type="modelC")
 	break
 
 
