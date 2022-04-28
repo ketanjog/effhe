@@ -2,6 +2,8 @@ import socket
 import torch
 import json
 import tenseal as ts
+from torchvision import datasets
+import torchvision.transforms as transforms
 
 #This is the CUSTOMER file
 
