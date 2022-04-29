@@ -151,9 +151,9 @@ while True:
         return enc_x
 
     
-    enc_x = prepare_input(payload["context"], payload["data"])
+    # enc_x = prepare_input(payload["context"], payload["data"])
 
-    print("obtained enc_x")
+    # print("obtained enc_x")
 
     
 
