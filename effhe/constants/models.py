@@ -1,3 +1,0 @@
-AVAILABLE_MODELS = [
-    "modelC"
-]
