@@ -1,1 +1,2 @@
-batch_size = 64
+BATCH_SIZE = 64
+SEED = 42

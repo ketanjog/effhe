@@ -1,39 +1,142 @@
 import socket
-from effhe.constants.server_client import HOST, PORT
+import struct
+from effhe.constants.server_client import HOST, PORT, AVAILABLE_MODELS, HEADER_LENGTH
+from effhe.constants.paths import SAVE_PATH, BASELINE_PATH
 import json
+import os
+from collections import defaultdict
+import sys
 
-server = socket.socket()
-print("Socket creation successful!")
+import tenseal as ts
+import torchvision.transforms as transforms
 
-# Bind to null host - listen for all incoming connections
-server.bind((HOST, PORT))
+from effhe.models.baseline_square_1c2f import ConvNet
+from effhe.constants.paths import BASELINE_PATH
+from effhe.models.baseline_square_1c2f_enc import EncConvNet
+from effhe.server_client.data import train
+from time import sleep
 
-#Listen for clients. Keep upto 2 clients in the buffer (not really required)
-server.listen(2)
+# --------------------------------------------------------------------------
+#------------------------Design Message Protocol----------------------------
+#---------------------------------------------------------------------------
+
+# Constants for the protocol:
+
+
+class Server():
+    def __init__(self):
+
+        self.init_data()
+        self._create_server()
+
+    def init_data(self):
+        """
+        Initialise available model status
+        """
+        # Establish status of each model
+        self.trained_models = defaultdict(lambda: "untrained")
+        for model in AVAILABLE_MODELS:
+            for filename in os.listdir(SAVE_PATH):
+                if filename.split('_')[0].lower() == model.lower():
+                    self.trained_models[model] = os.path.join(SAVE_PATH, filename)
+
+    def _create_server(self):
+        self.server = socket.socket()
+        print("Socket creation successful!")
+
+        # Bind to null host - listen for all incoming connections
+        self.server.bind((HOST, PORT))
+
+        #Listen for clients. Keep upto 2 clients in the buffer (not really required)
+        self.server.listen(2)
+
+    def receive_fixed_length_msg(self, msglen):
+        message = b''
+        while len(message) < msglen:
+            chunk = self.conn.recv(msglen - len(message))
+            if chunk == b'':
+                raise RuntimeError("socket connection broken")
+            message = message + chunk
+        return message
+
+    def receive_message(self):
+        header = self.receive_fixed_length_msg(HEADER_LENGTH)
+        message_length = struct.unpack("!Q", header)[0] 
+
+        message = None
+        if message_length > 0: 
+            message = self.receive_fixed_length_msg(message_length) 
+            message = message.decode("utf-8")
+
+        return message
+
+    def send_message(self, message, preencoded=False):
+        if not preencoded:
+            message = message.encode("utf-8") 
+        header = struct.pack("!Q", len(message))
+
+        message = header + message 
+        self.conn.sendall(message)
+
+    def accept(self):
+        self.conn, self.address = self.server.accept()
+
+    def close(self):
+        self.conn.close()
+# --------------------------------------------------------------------------
+#------------------------Driver code starts here----------------------------
+#---------------------------------------------------------------------------
+
+s = Server()
 
 while True:
 
     # Establish connection with a client
-    client, address = server.accept()
-    print("Connected to client at {}".format(address))
+    s.accept()
+    print("Connected to client at {}".format(s.address))
 
     # Send test message
-    client.send('You are connected to EFFHE'.encode())
+    s.send_message('You are connected to EFFHE')
+
+    payload = s.receive_message()
 
     # Recieve payload
-    payload = ''
-    while True:
-        batch = client.recv(1024)
-        payload += batch.decode()
-
-        if not batch:
-            break
-    # Close the connection
+    # payload = ''
+    # BUFFER = int(client.recv(BUFFER_SIZE).decode())
+    # while BUFFER != 0:
+    #     batch = client.recv(BUFFER_SIZE).decode()
+    #     payload += batch
+    #     BUFFER -= sys.getsizeof(batch)
+    #     print(BUFFER)
 
     payload = json.loads(payload)
-    print(payload["model"])
-    client.close()
+    
+    model = payload["model"]
+    print(model)
 
-    # break
+    # Check whether model is available
+    print("Commencing checks...")
+    if model not in AVAILABLE_MODELS:
+        print("Model not supported. Aborting...")
+        
+        s.send_message('Requested model not available')
+        s.close()
+        break
+
+    # If model is untrained, train it
+    if s.trained_models[model] == "untrained":
+        print("Training model for inference on {}".format(model))
+        train(model)
+    
+    # Everything is in order to begin inference
+    s.send_message('200')
+
+    
+
+
+
+    # Close the connection
+    # s.close()
+
 
 

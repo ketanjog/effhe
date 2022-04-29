@@ -10,5 +10,5 @@ MNIST_PATH = os.path.join(DATA_PATH, "mnist")
 
 # Save path
 SAVE_PATH = os.path.join(ROOT_PATH, "checkpoints")
-BASELINE_PATH = os.path.join(SAVE_PATH, "mnist_square_1c2f")
+BASELINE_PATH = os.path.join(SAVE_PATH, "mnist_relu_1c2f")
 
