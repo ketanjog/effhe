@@ -6,13 +6,15 @@ import json
 import os
 from collections import defaultdict
 import sys
+import pickle
 
 import tenseal as ts
 import torchvision.transforms as transforms
+import torch
 
 from effhe.models.baseline_square_1c2f import ConvNet
 from effhe.constants.paths import BASELINE_PATH
-from effhe.models.baseline_square_1c2f_enc import EncConvNet
+from effhe.models.baseline_relu_1c2f_enc import EncConvReluNet
 from effhe.server_client.data import train
 from time import sleep
 
@@ -130,6 +132,28 @@ while True:
     
     # Everything is in order to begin inference
     s.send_message('200')
+
+    # Now the back and forth begins
+
+    def prepare_input(context: bytes, ckks_vector: bytes) -> ts.CKKSVector:
+        # context = context.encode('utf-8')
+        # ckks_vector = ckks_vector.encode('utf-8')
+        try:
+            ctx = ts.context_from(context)
+            enc_x = ts.ckks_vector_from(ctx, ckks_vector)
+        except:
+            raise DeserializationError("cannot deserialize context or ckks_vector")
+        try:
+            _ = ctx.galois_keys()
+        except:
+            raise InvalidContext("the context doesn't hold galois keys")
+
+        return enc_x
+
+    
+    enc_x = prepare_input(payload["context"], payload["data"])
+
+    print("obtained enc_x")
 
     
 

@@ -1,3 +1,4 @@
+from curses import window
 import socket
 import struct
 from time import sleep
@@ -80,8 +81,9 @@ class Client():
         # Create json
         payload = {
             "data": str(data_enc),
-            "public_key": str(public_key),
-            "model": MODEL
+            "context": str(public_key),
+            "model": MODEL,
+            "windows_nb" : str(windows_nb)
         }
 
         payload = json.dumps(payload)
@@ -126,6 +128,8 @@ if int(affirmation) != 200:
 
 else:
     print("Inference procedure commencing...")
+
+# Now the back and forth begins:
 
 # close the connection
 c.close()  
