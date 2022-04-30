@@ -12,6 +12,7 @@ from effhe.server_client.cryptography import gen_key, encrypt_data, make_public_
 from effhe.constants.server_client import HOST, PORT, MODEL, HEADER_LENGTH
 import sys
 
+from timeit import default_timer
 
 
 
@@ -41,14 +42,15 @@ class Client():
             message = message + chunk
         return message
 
-    def receive_message(self):
+    def receive_message(self, decode_bytes = True):
         header = self.receive_fixed_length_msg(HEADER_LENGTH)
         message_length = struct.unpack("!Q", header)[0] 
 
         message = None
         if message_length > 0: 
             message = self.receive_fixed_length_msg(message_length) 
-            message = message.decode("utf-8")
+            if(decode_bytes):
+                message = message.decode("utf-8")
 
         return message
 
@@ -89,6 +91,21 @@ class Client():
 
         return payload, public_key, data_enc
 
+    def prepare_input(self, context: bytes, ckks_vector: bytes) -> ts.CKKSVector:
+        # context = context.encode('utf-8')
+        # ckks_vector = ckks_vector.encode('utf-8')
+        try:
+            ctx = ts.context_from(context)
+            enc_x = ts.ckks_vector_from(ctx, ckks_vector)
+        except:
+            raise DeserializationError("cannot deserialize context or ckks_vector")
+        try:
+            _ = ctx.galois_keys()
+        except:
+            raise InvalidContext("the context doesn't hold galois keys")
+
+        return enc_x
+
 
 
 
@@ -101,7 +118,7 @@ class Client():
 private_key = gen_key("small")
 
 # Get dataloader and query data
-query = get_query_data()
+query, label = get_query_data()
 
 
 
@@ -130,6 +147,47 @@ if int(affirmation) != 200:
 
 else:
     print("Inference procedure commencing...")
+
+    start_time = default_timer()
+
+    #Recieve first encrypted data
+    enc_x = c.receive_message(decode_bytes=False)
+    enc_x = c.prepare_input(public_key, enc_x)
+    print("decrypting...")
+    secret_key = private_key.secret_key()
+    dec_x = enc_x.decrypt(secret_key)
+    dec_x = torch.tensor(dec_x)
+    dec_x = torch.nn.ReLU()(dec_x)
+    enc_x = ts.CKKSVector(private_key, dec_x)
+    enc_x = enc_x.serialize()
+    c.send_message(enc_x, preencoded=True)
+
+    enc_x = c.receive_message(decode_bytes=False)
+    enc_x = c.prepare_input(public_key, enc_x)
+    print("decrypting...")
+    secret_key = private_key.secret_key()
+    dec_x = enc_x.decrypt(secret_key)
+    dec_x = torch.tensor(dec_x)
+    dec_x = torch.nn.ReLU()(dec_x)
+    enc_x = ts.CKKSVector(private_key, dec_x)
+    enc_x = enc_x.serialize()
+    c.send_message(enc_x, preencoded=True)
+
+    enc_pred = c.receive_message(decode_bytes=False)
+    enc_pred = c.prepare_input(public_key, enc_pred)
+    secret_key = private_key.secret_key()
+    dec_pred = enc_pred.decrypt(secret_key)
+
+    tot_time = default_timer() - start_time
+
+    dec_pred = torch.tensor(dec_pred).view(1, -1)
+    _, dec_pred = torch.max(dec_pred, 1)
+    dec_pred = dec_pred.item()
+
+    print("time taken:", tot_time)
+
+    print("prediction:", dec_pred)
+    print("ground truth: ", label)
 
 # Now the back and forth begins:
 

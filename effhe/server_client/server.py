@@ -12,7 +12,7 @@ import tenseal as ts
 import torchvision.transforms as transforms
 import torch
 
-from effhe.models.baseline_square_1c2f import ConvNet
+from effhe.models.baseline_relu_1c2f import ConvReluNet
 from effhe.constants.paths import BASELINE_PATH
 from effhe.models.baseline_relu_1c2f_enc import EncConvReluNet
 from effhe.server_client.data import train
@@ -86,6 +86,21 @@ class Server():
 
     def close(self):
         self.conn.close()
+
+    def prepare_input(self, context: bytes, ckks_vector: bytes) -> ts.CKKSVector:
+        # context = context.encode('utf-8')
+        # ckks_vector = ckks_vector.encode('utf-8')
+        try:
+            ctx = ts.context_from(context)
+            enc_x = ts.ckks_vector_from(ctx, ckks_vector)
+        except:
+            raise DeserializationError("cannot deserialize context or ckks_vector")
+        try:
+            _ = ctx.galois_keys()
+        except:
+            raise InvalidContext("the context doesn't hold galois keys")
+
+        return enc_x
 # --------------------------------------------------------------------------
 #------------------------Driver code starts here----------------------------
 #---------------------------------------------------------------------------
@@ -138,31 +153,31 @@ while True:
     if s.trained_models[model] == "untrained":
         print("Training model for inference on {}".format(model))
         train(model)
+
+    py_model = None
+    if(model == "MNIST"):
+        py_model = ConvReluNet()
+        py_model.load_state_dict(torch.load(BASELINE_PATH))
+
+    enc_model = EncConvReluNet(py_model, use_socket=True, pub_key = public_key)
+
+    print("Model loaded.")
     
     # Everything is in order to begin inference
     s.send_message('200')
 
     # Now the back and forth begins
-
-    def prepare_input(context: bytes, ckks_vector: bytes) -> ts.CKKSVector:
-        # context = context.encode('utf-8')
-        # ckks_vector = ckks_vector.encode('utf-8')
-        try:
-            ctx = ts.context_from(context)
-            enc_x = ts.ckks_vector_from(ctx, ckks_vector)
-        except:
-            raise DeserializationError("cannot deserialize context or ckks_vector")
-        try:
-            _ = ctx.galois_keys()
-        except:
-            raise InvalidContext("the context doesn't hold galois keys")
-
-        return enc_x
-
     
-    enc_x = prepare_input(public_key, data_enc)
+    enc_x = s.prepare_input(public_key, data_enc)
+    windows_nb = int(payload["windows_nb"])
 
-    print("Data prepared!")
+    pred = enc_model(enc_x, windows_nb, s)
+
+    pred_bytes = pred.serialize()
+
+    s.send_message(pred_bytes, preencoded=True)
+
+    print("prediction made!")
 
     
 

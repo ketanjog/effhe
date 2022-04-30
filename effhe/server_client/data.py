@@ -28,8 +28,9 @@ def get_query_data():
     test_data = datasets.MNIST('data', train=False, download=True, transform=transforms.ToTensor())
 
     query_data = test_data.__getitem__(0)[0]
+    label = test_data.__getitem__(0)[1]
     
-    return query_data
+    return query_data, label
 
 def train(model):
 
