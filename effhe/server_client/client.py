@@ -80,16 +80,14 @@ class Client():
 
         # Create json
         payload = {
-            "data": str(data_enc),
-            "context": str(public_key),
             "model": MODEL,
             "windows_nb" : str(windows_nb)
         }
 
         payload = json.dumps(payload)
-        payload = payload.encode('ascii')
+        payload = payload.encode('utf-8')
 
-        return payload
+        return payload, public_key, data_enc
 
 
 
@@ -117,8 +115,12 @@ print(response)
 
 
 # Create payload
-payload = c.make_payload(query, private_key)
+payload, public_key, data_enc = c.make_payload(query, private_key)
+
+# Send payload, pub_key, data
 c.send_message(payload, preencoded=True)
+c.send_message(public_key, preencoded=True)
+c.send_message(data_enc, preencoded=True)
 
 # Wait for affirmation
 affirmation = c.receive_message()

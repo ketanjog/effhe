@@ -61,14 +61,15 @@ class Server():
             message = message + chunk
         return message
 
-    def receive_message(self):
+    def receive_message(self, decode_bytes = True):
         header = self.receive_fixed_length_msg(HEADER_LENGTH)
         message_length = struct.unpack("!Q", header)[0] 
 
         message = None
         if message_length > 0: 
             message = self.receive_fixed_length_msg(message_length) 
-            message = message.decode("utf-8")
+            if(decode_bytes):
+                message = message.decode("utf-8")
 
         return message
 
@@ -100,7 +101,15 @@ while True:
     # Send test message
     s.send_message('You are connected to EFFHE')
 
+    print("Receiving data...")
+
     payload = s.receive_message()
+
+    #TenSEAL APIs take in raw bytes so no need to convert to string
+    public_key = s.receive_message(decode_bytes=False)
+    data_enc = s.receive_message(decode_bytes=False)
+
+    print("Data received!")
 
     # Recieve payload
     # payload = ''
@@ -151,9 +160,9 @@ while True:
         return enc_x
 
     
-    # enc_x = prepare_input(payload["context"], payload["data"])
+    enc_x = prepare_input(public_key, data_enc)
 
-    # print("obtained enc_x")
+    print("Data prepared!")
 
     
 
