@@ -24,11 +24,11 @@ def data_to_list(x, default_dims = [28,28]):
 
     return x.view(d1, d2).tolist()
 
-def get_query_data():
+def get_query_data(idx = 0):
     test_data = datasets.MNIST('data', train=False, download=True, transform=transforms.ToTensor())
 
-    query_data = test_data.__getitem__(0)[0]
-    label = test_data.__getitem__(0)[1]
+    query_data = test_data.__getitem__(idx)[0]
+    label = test_data.__getitem__(idx)[1]
     
     return query_data, label
 

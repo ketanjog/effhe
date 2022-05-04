@@ -106,10 +106,12 @@ class Client():
 
         return enc_x
 
-def do_non_linear(c, public_key, private_key, act="relu"):
+def do_non_linear(c, public_key, private_key, act="relu", track_time = False):
     enc_x = c.receive_message(decode_bytes=False)
+
+    start_time = default_timer()
     enc_x = c.prepare_input(public_key, enc_x)
-    
+
     print("decrypting...")
     secret_key = private_key.secret_key()
     dec_x = enc_x.decrypt(secret_key)
@@ -118,6 +120,10 @@ def do_non_linear(c, public_key, private_key, act="relu"):
     print("performing non-linear operation...")
     dec_x = torch.nn.ReLU()(dec_x)
     enc_x = ts.CKKSVector(private_key, dec_x)
+
+    if(track_time):
+        tot_time = default_timer() - start_time
+        print("time spent doing relu:", tot_time)
 
     print("sending back to client...")
     enc_x = enc_x.serialize()
@@ -176,7 +182,7 @@ else:
     # enc_x = enc_x.serialize()
     # c.send_message(enc_x, preencoded=True)
 
-    do_non_linear(c, public_key, private_key) #first relu
+    do_non_linear(c, public_key, private_key, track_time = True) #first relu
 
     # enc_x = c.receive_message(decode_bytes=False)
     # enc_x = c.prepare_input(public_key, enc_x)
@@ -189,7 +195,7 @@ else:
     # enc_x = enc_x.serialize()
     # c.send_message(enc_x, preencoded=True)
 
-    do_non_linear(c, public_key, private_key) #second relu 
+    do_non_linear(c, public_key, private_key, track_time = True) #second relu 
 
     #Receive and make prediction
     enc_pred = c.receive_message(decode_bytes=False)
