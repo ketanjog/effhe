@@ -184,8 +184,8 @@ while True:
 
 
     # Close the connection
-    s.close()
-    break
+    #s.close()
+    #break
 
 
 

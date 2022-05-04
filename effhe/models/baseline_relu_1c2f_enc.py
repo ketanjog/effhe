@@ -1,5 +1,6 @@
 import tenseal as ts
 import torch
+from timeit import default_timer
 
 class EncConvReluNet:
     def __init__(self, torch_nn, context=None, use_socket=False, pub_key = None):
@@ -21,7 +22,9 @@ class EncConvReluNet:
         self.pub_key = pub_key
         
         
-    def forward(self, enc_x, windows_nb, server):
+    def forward(self, enc_x, windows_nb, server, track_time = False):
+        time_val = 0
+        start_time = default_timer()
         # conv layer
         enc_channels = []
         for kernel, bias in zip(self.conv1_weight, self.conv1_bias):
@@ -30,10 +33,13 @@ class EncConvReluNet:
         # pack all channels into a single flattened vector
         enc_x = ts.CKKSVector.pack_vectors(enc_channels)
 
+        time_val += default_timer() - start_time
+
         if(self.use_socket):
             enc_x_bytes = enc_x.serialize()
             server.send_message(enc_x_bytes, preencoded=True)
             enc_x = server.receive_message(decode_bytes=False)
+            start_time = default_timer()
             enc_x = server.prepare_input(self.pub_key, enc_x)
         else:
             # =====BEGIN CLIENT-SIDE ACTIONS=====
@@ -50,11 +56,14 @@ class EncConvReluNet:
 
         # fc1 layer
         enc_x = enc_x.mm(self.fc1_weight) + self.fc1_bias
+
+        time_val += default_timer() - start_time
         
         if(self.use_socket):
             enc_x_bytes = enc_x.serialize()
             server.send_message(enc_x_bytes, preencoded=True)
             enc_x = server.receive_message(decode_bytes=False)
+            start_time = default_timer()
             enc_x = server.prepare_input(self.pub_key, enc_x)
         else:
             # =====BEGIN CLIENT-SIDE ACTIONS=====
@@ -71,6 +80,11 @@ class EncConvReluNet:
         
         # fc2 layer
         enc_x = enc_x.mm(self.fc2_weight) + self.fc2_bias
+        time_val += default_timer() - start_time
+
+        if(track_time):
+            print("time taken:", time_val)
+            
         return enc_x
     
     def __call__(self, *args, **kwargs):

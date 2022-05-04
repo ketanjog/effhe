@@ -137,86 +137,84 @@ def do_non_linear(c, public_key, private_key, act="relu", track_time = False):
 # Generate Key 
 private_key = gen_key("small")
 
-# Get dataloader and query data
-query, label = get_query_data()
+num_samples = 10
+
+for idx in range(num_samples):
+    # Create client
+    c = Client()
+    # Get dataloader and query data
+    query, label = get_query_data(idx)
 
 
-
-# Create client
-c = Client()
-
-
-# Test connection
-response = c.receive_message()
-print(response)
+    # Test connection
+    response = c.receive_message()
+    print(response)
 
 
-# Create payload
-payload, public_key, data_enc = c.make_payload(query, private_key)
+    # Create payload
+    payload, public_key, data_enc = c.make_payload(query, private_key)
 
-# Send payload, pub_key, data
-c.send_message(payload, preencoded=True)
-c.send_message(public_key, preencoded=True)
-c.send_message(data_enc, preencoded=True)
+    # Send payload, pub_key, data
+    c.send_message(payload, preencoded=True)
+    c.send_message(public_key, preencoded=True)
+    c.send_message(data_enc, preencoded=True)
 
-# Wait for affirmation
-affirmation = c.receive_message()
-if int(affirmation) != 200:
-    print(affirmation)
-    c.close()
+    # Wait for affirmation
+    affirmation = c.receive_message()
+    if int(affirmation) != 200:
+        print(affirmation)
+        c.close()
 
-else:
-    print("Inference procedure commencing...")
+    else:
+        print("Inference procedure commencing...")
 
-    start_time = default_timer()
+        start_time = default_timer()
 
-    #Recieve first encrypted data
-    # enc_x = c.receive_message(decode_bytes=False)
-    # enc_x = c.prepare_input(public_key, enc_x)
-    # print("decrypting...")
-    # secret_key = private_key.secret_key()
-    # dec_x = enc_x.decrypt(secret_key)
-    # dec_x = torch.tensor(dec_x)
-    # dec_x = torch.nn.ReLU()(dec_x)
-    # enc_x = ts.CKKSVector(private_key, dec_x)
-    # enc_x = enc_x.serialize()
-    # c.send_message(enc_x, preencoded=True)
+        #Recieve first encrypted data
+        # enc_x = c.receive_message(decode_bytes=False)
+        # enc_x = c.prepare_input(public_key, enc_x)
+        # print("decrypting...")
+        # secret_key = private_key.secret_key()
+        # dec_x = enc_x.decrypt(secret_key)
+        # dec_x = torch.tensor(dec_x)
+        # dec_x = torch.nn.ReLU()(dec_x)
+        # enc_x = ts.CKKSVector(private_key, dec_x)
+        # enc_x = enc_x.serialize()
+        # c.send_message(enc_x, preencoded=True)
 
-    do_non_linear(c, public_key, private_key, track_time = True) #first relu
+        do_non_linear(c, public_key, private_key, track_time = True) #first relu
 
-    # enc_x = c.receive_message(decode_bytes=False)
-    # enc_x = c.prepare_input(public_key, enc_x)
-    # print("decrypting...")
-    # secret_key = private_key.secret_key()
-    # dec_x = enc_x.decrypt(secret_key)
-    # dec_x = torch.tensor(dec_x)
-    # dec_x = torch.nn.ReLU()(dec_x)
-    # enc_x = ts.CKKSVector(private_key, dec_x)
-    # enc_x = enc_x.serialize()
-    # c.send_message(enc_x, preencoded=True)
+        # enc_x = c.receive_message(decode_bytes=False)
+        # enc_x = c.prepare_input(public_key, enc_x)
+        # print("decrypting...")
+        # secret_key = private_key.secret_key()
+        # dec_x = enc_x.decrypt(secret_key)
+        # dec_x = torch.tensor(dec_x)
+        # dec_x = torch.nn.ReLU()(dec_x)
+        # enc_x = ts.CKKSVector(private_key, dec_x)
+        # enc_x = enc_x.serialize()
+        # c.send_message(enc_x, preencoded=True)
 
-    do_non_linear(c, public_key, private_key, track_time = True) #second relu 
+        do_non_linear(c, public_key, private_key, track_time = True) #second relu 
 
-    #Receive and make prediction
-    enc_pred = c.receive_message(decode_bytes=False)
-    enc_pred = c.prepare_input(public_key, enc_pred)
-    secret_key = private_key.secret_key()
-    dec_pred = enc_pred.decrypt(secret_key)
+        #Receive and make prediction
+        enc_pred = c.receive_message(decode_bytes=False)
+        enc_pred = c.prepare_input(public_key, enc_pred)
+        secret_key = private_key.secret_key()
+        dec_pred = enc_pred.decrypt(secret_key)
 
-    tot_time = default_timer() - start_time
+        tot_time = default_timer() - start_time
 
-    dec_pred = torch.tensor(dec_pred).view(1, -1)
-    _, dec_pred = torch.max(dec_pred, 1)
-    dec_pred = dec_pred.item()
+        dec_pred = torch.tensor(dec_pred).view(1, -1)
+        _, dec_pred = torch.max(dec_pred, 1)
+        dec_pred = dec_pred.item()
 
-    print("time taken:", tot_time)
-    print("prediction:", dec_pred)
-    print("ground truth: ", label)
+        print("time taken:", tot_time)
+        print("prediction:", dec_pred)
+        print("ground truth: ", label)
 
-# Now the back and forth begins:
-
-# close the connection
-c.close()  
+        # close the connection
+        c.close()  
 
 
 
