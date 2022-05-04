@@ -146,6 +146,7 @@ for idx in range(num_samples):
     query, label = get_query_data(idx)
 
 
+    print("=================================")
     # Test connection
     response = c.receive_message()
     print(response)
@@ -212,6 +213,7 @@ for idx in range(num_samples):
         print("time taken:", tot_time)
         print("prediction:", dec_pred)
         print("ground truth: ", label)
+        print("=================================")
 
         # close the connection
         c.close()  
