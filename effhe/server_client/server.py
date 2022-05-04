@@ -16,6 +16,7 @@ from effhe.models.baseline_relu_1c2f import ConvReluNet
 from effhe.constants.paths import BASELINE_PATH
 from effhe.models.baseline_relu_1c2f_enc import EncConvReluNet
 from effhe.server_client.data import train
+from effhe.constants.server_client import TRACK_TIME
 from time import sleep
 
 # --------------------------------------------------------------------------
@@ -171,11 +172,15 @@ while True:
     enc_x = s.prepare_input(public_key, data_enc)
     windows_nb = int(payload["windows_nb"])
 
-    pred = enc_model(enc_x, windows_nb, s, track_time = True)
+    time_val = [0]
+    pred = enc_model(enc_x, windows_nb, s, track_time = True, time_store = time_val)
 
     pred_bytes = pred.serialize()
 
     s.send_message(pred_bytes, preencoded=True)
+    if(TRACK_TIME):
+        time_str = str(time_val[0])
+        s.send_message(time_str, preencoded=False)
 
     print("prediction made!")
 

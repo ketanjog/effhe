@@ -9,7 +9,7 @@ from torchvision import datasets
 import torchvision.transforms as transforms
 from effhe.server_client.data import get_MNIST_test_loader, data_to_list, get_query_data
 from effhe.server_client.cryptography import gen_key, encrypt_data, make_public_key
-from effhe.constants.server_client import HOST, PORT, MODEL, HEADER_LENGTH
+from effhe.constants.server_client import HOST, PORT, MODEL, HEADER_LENGTH, TRACK_TIME
 import sys
 
 from timeit import default_timer
@@ -129,6 +129,11 @@ def do_non_linear(c, public_key, private_key, act="relu", track_time = False):
     enc_x = enc_x.serialize()
     c.send_message(enc_x, preencoded=True)
 
+    if(track_time):
+        return tot_time
+    else:
+        return None
+
 
 # --------------------------------------------------------------------------
 #------------------------Driver code starts here----------------------------
@@ -168,6 +173,7 @@ for idx in range(num_samples):
 
     else:
         print("Inference procedure commencing...")
+        relu_time = 0
 
         start_time = default_timer()
 
@@ -183,7 +189,7 @@ for idx in range(num_samples):
         # enc_x = enc_x.serialize()
         # c.send_message(enc_x, preencoded=True)
 
-        do_non_linear(c, public_key, private_key, track_time = True) #first relu
+        relu_time += do_non_linear(c, public_key, private_key, track_time = True) #first relu
 
         # enc_x = c.receive_message(decode_bytes=False)
         # enc_x = c.prepare_input(public_key, enc_x)
@@ -196,7 +202,7 @@ for idx in range(num_samples):
         # enc_x = enc_x.serialize()
         # c.send_message(enc_x, preencoded=True)
 
-        do_non_linear(c, public_key, private_key, track_time = True) #second relu 
+        relu_time += do_non_linear(c, public_key, private_key, track_time = True) #second relu 
 
         #Receive and make prediction
         enc_pred = c.receive_message(decode_bytes=False)
@@ -210,7 +216,17 @@ for idx in range(num_samples):
         _, dec_pred = torch.max(dec_pred, 1)
         dec_pred = dec_pred.item()
 
+
+
         print("time taken:", tot_time)
+        if(TRACK_TIME):
+            server_time = c.receive_message()
+            server_time = float(server_time)
+            task_time = server_time + relu_time
+            latency_time = tot_time - task_time
+            print("latency:", latency_time)
+            print("task:", task_time)
+
         print("prediction:", dec_pred)
         print("ground truth: ", label)
         print("=================================")

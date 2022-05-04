@@ -12,3 +12,6 @@ AVAILABLE_MODELS = [
     "modelC",
     "MNIST" 
     ]
+
+#timing flags
+TRACK_TIME = True

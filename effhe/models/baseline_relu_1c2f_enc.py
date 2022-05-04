@@ -22,7 +22,7 @@ class EncConvReluNet:
         self.pub_key = pub_key
         
         
-    def forward(self, enc_x, windows_nb, server, track_time = False):
+    def forward(self, enc_x, windows_nb, server, track_time = False, time_store = None):
         time_val = 0
         start_time = default_timer()
         # conv layer
@@ -84,7 +84,8 @@ class EncConvReluNet:
 
         if(track_time):
             print("time taken:", time_val)
-            
+            time_store[0] = time_val
+
         return enc_x
     
     def __call__(self, *args, **kwargs):
