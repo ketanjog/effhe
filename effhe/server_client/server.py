@@ -173,7 +173,7 @@ while True:
     windows_nb = int(payload["windows_nb"])
 
     time_val = [0]
-    pred = enc_model(enc_x, windows_nb, s, track_time = True, time_store = time_val)
+    pred = enc_model(enc_x, windows_nb, server = s, track_time = True, time_store = time_val)
 
     pred_bytes = pred.serialize()
 

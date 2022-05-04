@@ -177,30 +177,7 @@ for idx in range(num_samples):
 
         start_time = default_timer()
 
-        #Recieve first encrypted data
-        # enc_x = c.receive_message(decode_bytes=False)
-        # enc_x = c.prepare_input(public_key, enc_x)
-        # print("decrypting...")
-        # secret_key = private_key.secret_key()
-        # dec_x = enc_x.decrypt(secret_key)
-        # dec_x = torch.tensor(dec_x)
-        # dec_x = torch.nn.ReLU()(dec_x)
-        # enc_x = ts.CKKSVector(private_key, dec_x)
-        # enc_x = enc_x.serialize()
-        # c.send_message(enc_x, preencoded=True)
-
         relu_time += do_non_linear(c, public_key, private_key, track_time = True) #first relu
-
-        # enc_x = c.receive_message(decode_bytes=False)
-        # enc_x = c.prepare_input(public_key, enc_x)
-        # print("decrypting...")
-        # secret_key = private_key.secret_key()
-        # dec_x = enc_x.decrypt(secret_key)
-        # dec_x = torch.tensor(dec_x)
-        # dec_x = torch.nn.ReLU()(dec_x)
-        # enc_x = ts.CKKSVector(private_key, dec_x)
-        # enc_x = enc_x.serialize()
-        # c.send_message(enc_x, preencoded=True)
 
         relu_time += do_non_linear(c, public_key, private_key, track_time = True) #second relu 
 
@@ -215,8 +192,6 @@ for idx in range(num_samples):
         dec_pred = torch.tensor(dec_pred).view(1, -1)
         _, dec_pred = torch.max(dec_pred, 1)
         dec_pred = dec_pred.item()
-
-
 
         print("time taken:", tot_time)
         if(TRACK_TIME):

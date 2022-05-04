@@ -22,7 +22,7 @@ class EncConvReluNet:
         self.pub_key = pub_key
         
         
-    def forward(self, enc_x, windows_nb, server, track_time = False, time_store = None):
+    def forward(self, enc_x, windows_nb, server = None, track_time = False, time_store = None):
         time_val = 0
         start_time = default_timer()
         # conv layer
