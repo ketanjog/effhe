@@ -1,5 +1,6 @@
 import tenseal as ts
 import torch
+from timeit import default_timer
 
 class EncSimpleAprxConvNet:
     '''
@@ -20,8 +21,11 @@ class EncSimpleAprxConvNet:
 
         self.relu = torch.nn.ReLU()
         self.context = context 
+        self.time_store = None
         
     def forward(self, enc_x, windows_nb):
+        start_time = default_timer()
+
         # conv layer
         enc_channels = []
         for kernel, bias in zip(self.conv1_weight, self.conv1_bias):
@@ -31,6 +35,10 @@ class EncSimpleAprxConvNet:
         # pack all channels into a single flattened vector
         enc_x = ts.CKKSVector.pack_vectors(enc_channels)
 
+        conv_time = default_timer() - start_time
+
+        relu_1_start = default_timer()
+
         #Relu approximation from https://arxiv.org/pdf/1811.09953.pdf (faster cryptonets)
         enc_x = enc_x.polyval(
             [0.25, 
@@ -38,8 +46,15 @@ class EncSimpleAprxConvNet:
             0.125]
         )
 
+        relu_1_time = default_timer() - relu_1_start
+
+        fc1_begins = default_timer()
         # fc1 layer
         enc_x = enc_x.mm(self.fc1_weight) + self.fc1_bias
+        fc1_time = default_timer() - fc1_begins
+        tot_time = default_timer() - start_time
+
+        self.time_store = [conv_time, relu_1_time, fc1_time, tot_time]
 
         return enc_x
     
