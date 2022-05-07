@@ -1,0 +1,9 @@
+handshake_time:        Mean: 2.91313 StdDev: 0.17321
+decryption_one_time:       Mean: 0.00233 StdDev: 0.00024
+relu_one_time:             Mean: 8e-05 StdDev: 2e-05
+encryption_one_time:       Mean: 0.01238 StdDev: 0.00091
+client_one_round_time: Mean: 0.01489StdDev: 0.00104
+inference_time:        Mean: 1.21508 StdDev: 0.08591
+conv_time:             Mean: 0.10079 StdDev: 0.00506
+fc1_time:              Mean: 1.18667 StdDev: 0.08498
+server_round_time:     Mean: 1.63422 StdDev: 0.09479

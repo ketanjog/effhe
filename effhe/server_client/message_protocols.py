@@ -76,11 +76,13 @@ class Server():
     def close(self):
         self.conn.close()
 
-    def prepare_input(self, context: bytes, ckks_vector: bytes) -> ts.CKKSVector:
+    def prepare_input(self, context, ckks_vector: bytes, use_bytes = False) -> ts.CKKSVector:
         # context = context.encode('utf-8')
         # ckks_vector = ckks_vector.encode('utf-8')
         try:
-            ctx = ts.context_from(context)
+            ctx = context
+            if(use_bytes):
+                ctx = ts.context_from(context)
             enc_x = ts.ckks_vector_from(ctx, ckks_vector)
         except:
             raise ValueError("cannot deserialize context or ckks_vector")
@@ -164,11 +166,13 @@ class Client():
 
         return payload, public_key, data_enc
 
-    def prepare_input(self, context: bytes, ckks_vector: bytes) -> ts.CKKSVector:
+    def prepare_input(self, context, ckks_vector: bytes, use_bytes = False) -> ts.CKKSVector:
         # context = context.encode('utf-8')
         # ckks_vector = ckks_vector.encode('utf-8')
         try:
-            ctx = ts.context_from(context)
+            ctx = context
+            if(use_bytes):
+                ctx = ts.context_from(context)
             enc_x = ts.ckks_vector_from(ctx, ckks_vector)
         except:
             raise ValueError("cannot deserialize context or ckks_vector")

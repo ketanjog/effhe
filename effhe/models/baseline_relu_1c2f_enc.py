@@ -25,6 +25,7 @@ class EncConvReluNet:
         
     def forward(self, enc_x, windows_nb, server = None, track_time = False, time_store = None):
         time_val = 0
+        #print("begin forward")
         start_time = default_timer()
         # conv layer
         enc_channels = []
@@ -105,6 +106,7 @@ class EncConvReluNet:
 
         # Store the time taken:
         self.time_store = [conv_time, fc1_time, fc2_time, tot_time]
+        #print("end forward")
 
         return enc_x
     

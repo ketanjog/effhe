@@ -8,6 +8,7 @@ from effhe.models.baseline_relu_1c2f_enc import EncConvReluNet
 from effhe.server_client.data import train
 from effhe.constants.server_client import TRACK_TIME
 from effhe.server_client.message_protocols import Server
+import tenseal as ts
 
 s = Server()
 
@@ -29,6 +30,7 @@ while True:
     public_key = s.receive_message(decode_bytes=False)
     data_enc = s.receive_message(decode_bytes=False)
 
+    public_key = ts.context_from(public_key)
     print("Data received!")
 
     payload = json.loads(payload)

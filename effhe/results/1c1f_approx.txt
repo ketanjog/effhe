@@ -1,0 +1,4 @@
+Conv_time:         Mean: 0.17302 StdDev: 0.00485
+Relu 1 time:       Mean: 0.01749 StdDev: 0.0006
+fc1 time:          Mean: 0.59803 StdDev: 0.03578
+server_round_time: Mean: 0.78854 StdDev: 0.03522
