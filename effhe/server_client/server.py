@@ -1,10 +1,7 @@
-
 from effhe.constants.server_client import HOST, PORT, AVAILABLE_MODELS, HEADER_LENGTH
 from effhe.constants.paths import SAVE_PATH, BASELINE_PATH
 import json
-
 import torch
-
 from effhe.models.baseline_relu_1c2f import ConvReluNet
 from effhe.constants.paths import BASELINE_PATH
 from effhe.models.baseline_relu_1c2f_enc import EncConvReluNet
@@ -18,6 +15,7 @@ while True:
 
     # Establish connection with a client
     s.accept()
+
     print("Connected to client at {}".format(s.address))
 
     # Send test message
@@ -78,6 +76,8 @@ while True:
     if(TRACK_TIME):
         time_str = str(time_val[0])
         s.send_message(time_str, preencoded=False)
+
+    print(str(enc_model.time_store))
 
     print("prediction made!")
 

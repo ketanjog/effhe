@@ -12,12 +12,12 @@ private_key = gen_key("small")
 num_samples = 3
 
 for idx in range(num_samples):
-    # Create client
-    c = Client()
     # Get dataloader and query data
     query, label = get_query_data(idx)
 
-
+    # Create client
+    c = Client()
+    
     print("=================================")
     # Test connection
     response = c.receive_message()
@@ -46,7 +46,8 @@ for idx in range(num_samples):
 
         relu_time += c.do_non_linear(public_key, private_key, track_time = True) #first relu
 
-        relu_time += c.do_non_linear(public_key, private_key, track_time = True) #second relu 
+        relu_time += c.do_non_linear(public_key, private_key, track_time = True) #second relu
+
 
         #Receive and make prediction
         enc_pred = c.receive_message(decode_bytes=False)

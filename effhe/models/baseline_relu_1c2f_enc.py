@@ -20,6 +20,7 @@ class EncConvReluNet:
         self.relu = torch.nn.ReLU()
         self.use_socket = use_socket
         self.pub_key = pub_key
+        self.time_store = None
         
         
     def forward(self, enc_x, windows_nb, server = None, track_time = False, time_store = None):
@@ -35,11 +36,14 @@ class EncConvReluNet:
 
         time_val += default_timer() - start_time
 
+        # Conv layer time
+        conv_time = default_timer() - start_time
+
         if(self.use_socket):
             enc_x_bytes = enc_x.serialize()
             server.send_message(enc_x_bytes, preencoded=True)
             enc_x = server.receive_message(decode_bytes=False)
-            start_time = default_timer()
+            start_time2 = default_timer()
             enc_x = server.prepare_input(self.pub_key, enc_x)
         else:
             # =====BEGIN CLIENT-SIDE ACTIONS=====
@@ -55,15 +59,19 @@ class EncConvReluNet:
             #=====END CLIENT-SIDE ACTIONS=====
 
         # fc1 layer
+        fc1_begins = default_timer()
         enc_x = enc_x.mm(self.fc1_weight) + self.fc1_bias
 
-        time_val += default_timer() - start_time
+        # FC1 time:
+        fc1_time = default_timer() - fc1_begins
+
+        time_val += default_timer() - start_time2
         
         if(self.use_socket):
             enc_x_bytes = enc_x.serialize()
             server.send_message(enc_x_bytes, preencoded=True)
             enc_x = server.receive_message(decode_bytes=False)
-            start_time = default_timer()
+            start_time2 = default_timer()
             enc_x = server.prepare_input(self.pub_key, enc_x)
         else:
             # =====BEGIN CLIENT-SIDE ACTIONS=====
@@ -79,12 +87,24 @@ class EncConvReluNet:
             #=====END CLIENT-SIDE ACTIONS=====
         
         # fc2 layer
+        fc2_begins = default_timer()
         enc_x = enc_x.mm(self.fc2_weight) + self.fc2_bias
-        time_val += default_timer() - start_time
+
+        # fc2 time
+        fc2_time = default_timer() - fc2_begins
+        time_val += default_timer() - start_time2
+
+        tot_time = default_timer() - start_time
 
         if(track_time):
             print("time taken:", time_val)
-            time_store[0] = time_val
+            # time_store[0] = time_val
+            time_store[0] = [conv_time, fc1_time, fc2_time, tot_time]
+        
+       
+
+        # Store the time taken:
+        self.time_store = [conv_time, fc1_time, fc2_time, tot_time]
 
         return enc_x
     

@@ -13,6 +13,7 @@ import os
 import tenseal as ts
 
 class Server():
+
     def __init__(self):
 
         self.init_data()
@@ -35,6 +36,7 @@ class Server():
 
         # Bind to null host - listen for all incoming connections
         self.server.bind((HOST, PORT))
+        self.active_clients = defaultdict()
 
         #Listen for clients. Keep upto 2 clients in the buffer (not really required)
         self.server.listen(2)
@@ -177,28 +179,44 @@ class Client():
 
         return enc_x
 
-    def do_non_linear(self, public_key, private_key, act="relu", track_time = False):
+    def do_non_linear(self, public_key, private_key, act="relu", track_time = False, exp=False, verbose=False):
+        verboseprint = print if verbose else lambda *a, **k: None
+
         enc_x = self.receive_message(decode_bytes=False)
 
+        # Start time
         start_time = default_timer()
+
         enc_x = self.prepare_input(public_key, enc_x)
 
-        print("decrypting...")
+        verboseprint("decrypting...")
         secret_key = private_key.secret_key()
         dec_x = enc_x.decrypt(secret_key)
         dec_x = torch.tensor(dec_x)
 
-        print("performing non-linear operation...")
+        # Decryption time
+        decryption_time = default_timer() - start_time
+
+        verboseprint("performing non-linear operation...")
         dec_x = torch.nn.ReLU()(dec_x)
+
+        # Relu time
+        relu_time = default_timer() - decryption_time - start_time
+
+        verboseprint("sending back to client...")
         enc_x = ts.CKKSVector(private_key, dec_x)
-
-        if(track_time):
-            tot_time = default_timer() - start_time
-            print("time spent doing relu:", tot_time)
-
-        print("sending back to client...")
         enc_x = enc_x.serialize()
+
+        # Encryption time
+        encryption_time = default_timer() - relu_time - decryption_time - start_time
         self.send_message(enc_x, preencoded=True)
+
+        tot_time = default_timer() - start_time
+        if(track_time):
+            verboseprint("time spent doing relu:", tot_time)
+
+        if(exp):
+            return decryption_time, relu_time, encryption_time, tot_time
 
         if(track_time):
             return tot_time
