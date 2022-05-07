@@ -18,12 +18,16 @@ from tqdm import tqdm
 private_key = gen_key("small")
 
 # Constants for experiment
-NUM_SAMPLES = 2
+NUM_SAMPLES = 100
 handshake_time = []
-decryption_time = []
-relu_time = []
-encryption_time = []
+decryption_one_time = []
+decryption_two_time = []
+relu_one_time = []
+relu_two_time = []
+encryption_one_time = []
+encryption_two_time = []
 client_one_round_time = []
+client_two_round_time = []
 inference_time = []
 conv_time = []
 fc1_time = []
@@ -62,18 +66,18 @@ for idx in tqdm(range(NUM_SAMPLES)):
 
         # Do first non linear and log all times
         _decryption_time, _relu_time, _encryption_time, _tot_time = c.do_non_linear(public_key, private_key, track_time = True, exp=True) #first relu
-        decryption_time.append(_decryption_time)
-        relu_time.append(_relu_time)
-        encryption_time.append(_encryption_time)
+        decryption_one_time.append(_decryption_time)
+        relu_one_time.append(_relu_time)
+        encryption_one_time.append(_encryption_time)
         client_one_round_time.append(_tot_time)
 
 
         # Do second non linear and log all times
         _decryption_time, _relu_time, _encryption_time, _tot_time= c.do_non_linear(public_key, private_key, track_time = True, exp=True) #second relu
-        decryption_time.append(_decryption_time)
-        relu_time.append(_relu_time)
-        encryption_time.append(_encryption_time)
-        client_one_round_time.append(_tot_time)        
+        decryption_two_time.append(_decryption_time)
+        relu_two_time.append(_relu_time)
+        encryption_two_time.append(_encryption_time)
+        client_two_round_time.append(_tot_time)        
         
         #Receive and make prediction
         enc_pred = c.receive_message(decode_bytes=False)
@@ -104,14 +108,18 @@ for idx in tqdm(range(NUM_SAMPLES)):
         # close the connection
         c.close()
 
-print("handshake_time:        " + "Mean: " + str(round(mean(handshake_time),5))+ "StdDev: " + str(round(pstdev(handshake_time),5)))
-print("decryption_time:       " + "Mean: " + str(round(mean(decryption_time),5)) +  "StdDev: " + str(round(pstdev(decryption_time),5)))
-print("relu_time:             " + "Mean: " + str(round(mean(relu_time),5)) + "StdDev: " + str(round(pstdev(relu_time),5)))
-print("encryption_time:       " + "Mean: " + str(round(mean(encryption_time),5)) + "StdDev: " + str(round(pstdev(encryption_time),5)))
+print("handshake_time:        " + "Mean: " + str(round(mean(handshake_time),5))+ " StdDev: " + str(round(pstdev(handshake_time),5)))
+print("decryption_one_time:       " + "Mean: " + str(round(mean(decryption_one_time),5)) +  " StdDev: " + str(round(pstdev(decryption_one_time),5)))
+print("decryption_two_time:       " + "Mean: " + str(round(mean(decryption_two_time),5)) +  " StdDev: " + str(round(pstdev(decryption_two_time),5)))
+print("relu_one_time:             " + "Mean: " + str(round(mean(relu_one_time),5)) + " StdDev: " + str(round(pstdev(relu_one_time),5)))
+print("relu_two_time:             " + "Mean: " + str(round(mean(relu_two_time),5)) + " StdDev: " + str(round(pstdev(relu_two_time),5)))
+print("encryption_one_time:       " + "Mean: " + str(round(mean(encryption_one_time),5)) + " StdDev: " + str(round(pstdev(encryption_one_time),5)))
+print("encryption_two_time:       " + "Mean: " + str(round(mean(encryption_two_time),5)) + " StdDev: " + str(round(pstdev(encryption_two_time),5)))
 print("client_one_round_time: " + "Mean: " + str(round(mean(client_one_round_time),5)) + "StdDev: " + str(round(pstdev(client_one_round_time),5)))
-print("inference_time:        " + "Mean: " + str(round(mean(inference_time),5)) + "StdDev: " + str(round(pstdev(inference_time),5)))
-print("conv_time:             " + "Mean: " + str(round(mean(conv_time),5)) + "StdDev: " + str(round(pstdev(conv_time),5)))
-print("fc1_time:              " + "Mean: " + str(round(mean(fc1_time),5)) + "StdDev: " + str(round(pstdev(fc1_time),5)))
-print("fc2_time:              " + "Mean: " + str(round(mean(fc2_time),5)) + "StdDev: " + str(round(pstdev(fc2_time),5)))
-print("server_round_time:     " + "Mean: " + str(round(mean(server_round_time),5)) + "StdDev: " + str(round(pstdev(server_round_time),5)))
+print("client_two_round_time: " + "Mean: " + str(round(mean(client_two_round_time),5)) + "StdDev: " + str(round(pstdev(client_two_round_time),5)))
+print("inference_time:        " + "Mean: " + str(round(mean(inference_time),5)) + " StdDev: " + str(round(pstdev(inference_time),5)))
+print("conv_time:             " + "Mean: " + str(round(mean(conv_time),5)) + " StdDev: " + str(round(pstdev(conv_time),5)))
+print("fc1_time:              " + "Mean: " + str(round(mean(fc1_time),5)) + " StdDev: " + str(round(pstdev(fc1_time),5)))
+print("fc2_time:              " + "Mean: " + str(round(mean(fc2_time),5)) + " StdDev: " + str(round(pstdev(fc2_time),5)))
+print("server_round_time:     " + "Mean: " + str(round(mean(server_round_time),5)) + " StdDev: " + str(round(pstdev(server_round_time),5)))
 
