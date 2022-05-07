@@ -11,6 +11,7 @@ from effhe.server_client.message_protocols import Client
 from timeit import default_timer
 import ast
 from statistics import pstdev, mean
+from tqdm import tqdm
 
 
 # Generate Key
@@ -31,7 +32,7 @@ server_round_time = []
 
 
 
-for idx in range(NUM_SAMPLES):
+for idx in tqdm(range(NUM_SAMPLES)):
     iter_begins = default_timer()
     # Get dataloader and query data
     query, label = get_query_data(idx)
@@ -40,7 +41,7 @@ for idx in range(NUM_SAMPLES):
     c = Client()
     # Test connection
     response = c.receive_message()
-    print(response)
+    # print(response)
     # Create payload
     payload, public_key, data_enc = c.make_payload(query, private_key)
     # Send payload, pub_key, data
@@ -55,7 +56,7 @@ for idx in range(NUM_SAMPLES):
         c.close()
 
     else:
-        print("Inference procedure commencing...")
+        # print("Inference procedure commencing...")
         handshake_complete = default_timer()
         handshake_time.append(handshake_complete - iter_begins)
 
@@ -88,7 +89,7 @@ for idx in range(NUM_SAMPLES):
         _, dec_pred = torch.max(dec_pred, 1)
         dec_pred = dec_pred.item()
 
-        print("time taken:", tot_time)
+        # print("time taken:", tot_time)
         if(TRACK_TIME):
             server_time = c.receive_message()
             # Log the server side times
