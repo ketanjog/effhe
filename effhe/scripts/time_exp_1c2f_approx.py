@@ -10,7 +10,7 @@ from statistics import mean, pstdev
 from tqdm import tqdm
 
 # Constants for the test
-NUM_SAMPLES = 2
+NUM_SAMPLES = 100
 conv_time = []
 relu_1_time = []
 fc1_time = []
