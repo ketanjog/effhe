@@ -20,7 +20,7 @@ import tenseal as ts
 private_key = gen_key("small")
 
 # Constants for experiment
-NUM_SAMPLES = 5
+NUM_SAMPLES = 3
 handshake_time = []
 decryption_one_time = []
 decryption_two_time = []

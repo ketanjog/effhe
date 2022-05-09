@@ -9,6 +9,8 @@ from statistics import mean, pstdev
 from tqdm import tqdm
 from effhe.models.baseline_relu_1c1f_approx_enc import EncSimpleAprxConvNet
 
+#Adapted from https://github.com/OpenMined/TenSEAL/blob/main/tutorials/Tutorial%204%20-%20Encrypted%20Convolution%20on%20MNIST.ipynb
+
 
 # Constants for the test
 NUM_SAMPLES = 100

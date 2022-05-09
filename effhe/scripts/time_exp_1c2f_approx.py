@@ -9,6 +9,8 @@ from timeit import default_timer
 from statistics import mean, pstdev
 from tqdm import tqdm
 
+#Adapted from https://github.com/OpenMined/TenSEAL/blob/main/tutorials/Tutorial%204%20-%20Encrypted%20Convolution%20on%20MNIST.ipynb
+
 # Constants for the test
 NUM_SAMPLES = 100
 conv_time = []
