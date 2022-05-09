@@ -20,7 +20,7 @@ import tenseal as ts
 private_key = gen_key("small")
 
 # Constants for experiment
-NUM_SAMPLES = 100
+NUM_SAMPLES = 5
 handshake_time = []
 decryption_one_time = []
 relu_one_time = []
@@ -81,8 +81,10 @@ for idx in tqdm(range(NUM_SAMPLES)):
         _, dec_pred = torch.max(dec_pred, 1)
         dec_pred = dec_pred.item()
 
-        # print("prediction:",dec_pred)
-        # print("label", label)
+        print("===prediction vs. true===")
+        print("prediction:",dec_pred)
+        print("label", label)
+        print("=========================")
 
         # print("time taken:", tot_time)
         if(TRACK_TIME):

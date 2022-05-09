@@ -20,7 +20,7 @@ import tenseal as ts
 private_key = gen_key("small")
 
 # Constants for experiment
-NUM_SAMPLES = 100
+NUM_SAMPLES = 5
 handshake_time = []
 decryption_one_time = []
 decryption_two_time = []
@@ -103,8 +103,10 @@ for idx in tqdm(range(NUM_SAMPLES)):
             fc2_time.append(_fc2)
             server_round_time.append(_serv_total)
         
-        #print("prediction:",dec_pred)
-        #print("label", label)
+        print("===prediction vs. true===")
+        print("prediction:",dec_pred)
+        print("label", label)
+        print("=========================")
 
         # Log total time taken
         tot_time = default_timer() - inf_start
