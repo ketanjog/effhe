@@ -15,4 +15,18 @@ make virtulenv
 source venv/bin/activate
 make all
 ```
+# How to test
 
+## In one terminal window run:
+```
+python effhe/server_client/server_1c1f.py
+```
+
+
+## In another terminal window run:
+```
+python effhe/scripts/test_effhe_1c1f.py 
+```
+See the magic happen.
+
+## Final output on server and client side should look something like this:
