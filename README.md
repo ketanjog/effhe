@@ -30,3 +30,5 @@ python effhe/scripts/test_effhe_1c1f.py
 See the magic happen.
 
 ## Final output on server and client side should look something like this:
+![Screenshot](etc/server_output.png)
+![Screenshot](etc/client_output.png)
