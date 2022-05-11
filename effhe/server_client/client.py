@@ -4,6 +4,7 @@ from effhe.server_client.cryptography import gen_key
 from effhe.constants.server_client import TRACK_TIME
 from effhe.server_client.message_protocols import Client
 from timeit import default_timer
+from effhe.server_client.cryptography import make_public_key
 
 
 # Generate Key
@@ -39,6 +40,7 @@ for idx in range(num_samples):
         c.close()
 
     else:
+        public_key = make_public_key(private_key)
         print("Inference procedure commencing...")
         relu_time = 0
 
@@ -64,11 +66,7 @@ for idx in range(num_samples):
         print("time taken:", tot_time)
         if(TRACK_TIME):
             server_time = c.receive_message()
-            server_time = float(server_time)
-            task_time = server_time + relu_time
-            latency_time = tot_time - task_time
-            print("latency:", latency_time)
-            print("task:", task_time)
+            print("times:", server_time)
 
         print("prediction:", dec_pred)
         print("ground truth: ", label)
